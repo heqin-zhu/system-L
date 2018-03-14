@@ -1,2 +1,2 @@
-# L-system
-a simple formal logic calculation based on L-system
+# system-L
+formal logic deduction based on system-L
