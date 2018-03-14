@@ -6,7 +6,6 @@ import sympy
 from random import  randint
 
 
-
 NON = sympy.Symbol('~')
 CONTAIN = sympy.Symbol('>')
 #AND = sympy .Symbol('
