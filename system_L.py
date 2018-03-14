@@ -6,7 +6,7 @@ eg p>~(q>~r)
 
 i feel pretty sorry for that there  are possibly  some bugs.
 I am striving to handle them.
-If your find some or you have some good idea abuot the method of proving,
+If your find some or you have some good ideas about the method of proving,
 please tell me, many thanks!
 '''
 
@@ -40,10 +40,8 @@ def isConn(p):
 
 
 def in2pre(s):
-    ''' s is a list of inorder symbols repring a proposition
-        (probably  contains parentheses)
-        this func converts it to preorder form
-        list -> list
+    ''' 
+        inorder symbols of list ->  prorder symbols of list
     '''
     def matchParentheses(i=0,reverse=False):
         '''match parentheses from one end  of s and ret pointer i'''
@@ -74,7 +72,6 @@ def in2pre(s):
 
 class formula:
     def __init__(self,preOrderLst):
-        '''symbols object repring a proposition'''
         self.preOrderLst = preOrderLst
         if not self.isValid(): raise Exception('invalid formula')
         self.inOrderLst = self.pre2in(self.preOrderLst)
@@ -94,13 +91,14 @@ class formula:
     def isValid(self):
         return self.validSub(self.preOrderLst)[0]
     def isNonType(self):
-        '''return if it's ~p form'''
+        '''return  True if it's ~p form'''
         return self.preOrderLst[0]==NON
     
     def validSub(self,s=None,begin=0,end=None):
         '''
-            check a *preOrder-list* until forming a valid proposition and return the index
-            by the way, this func return if the list s is a valid prop
+            check a *preOrder-list* s from left of its preOrderLst
+            until forming a valid proposition
+            return ('if s[begin:end] froms a  valid prop' , the index)
             return:  (bool,int)
         '''
         
@@ -117,8 +115,8 @@ class formula:
             i+=1
         return (ct==1 and i==n,i)
     def getPairs(self):
-        '''return getPairs of formulas after enough p2p func,
-            eg p>(q>~r)>(~t>s): return [p>(q>~r),~t>s,~t,s]
+        '''return Pairs of formulas likr[(p,q)...] after applying enough p2p func,
+            eg q>(~r>(~t>s)): return [(q,~r>(~t>s)),(~r,~t>s),(~t,s)]
         '''
         s = []  #pair(self,None)
         cur = self
@@ -130,8 +128,8 @@ class formula:
             
     def p2q(self,fm=None):
         '''
-            if f can be formed like p->q:  return (p,q),  
-            return f,None
+            if f can be formed in the form of  p->q:  return (p,q),  
+            else return f,None
             p,q,f are all formula s
         '''
         if fm is None: fm = self
@@ -207,7 +205,7 @@ class  system_L:
         return contain(left,right)
     
     def genFormula(self,s:str)->formula:
-        s=s.replace('~~','')
+        s=s.replace('~~','')  #  simplify the deduction,  to do
         s=s.replace('->','>')
         li = re.findall(r'[\(\)\>\~]|\w+',s)
         li = [sympy.Symbol(i) for i in li]
@@ -215,7 +213,7 @@ class  system_L:
         return formula(s)
 
     def addL1(self,i,p,q,tmp_mp):
-        '''i = p>q加入否定前件律.以及L1得来的公式'''
+        '''i = p>q,加入由 否定前件律 或 L1 得来的公式'''
         if not p.isNonType():
             #  p>q or p>~q: get  ~p>(p>q)
             tmp_mp[contain(non(p),i)] = ([],'否定前件律')
@@ -224,7 +222,7 @@ class  system_L:
             tmp_mp[contain(q,i)] = ([],'L1')
 
     def addMP(self,i,p,q,tmp_mp):
-        '''i=p>Q加入 换位律公式,以及mp得来的公式'''
+        '''i=p>q 加入由 换位律 或 MP 得来的公式'''
         if p.isNonType() and q.isNonType():
             # p=~a,q=~b:   ~a->~b ->(b->a)
             nonpq = contain(non(q),non(p))
@@ -405,7 +403,6 @@ if __name__=='__main__':
            ('~(p>q)>~q',[]),
            ('~(p>q)>~q',[]),
            ]
-    #props =[('p>q>p>p',[])]
     for prop,garma in props:
         try:
             L.prove(garma,prop)
