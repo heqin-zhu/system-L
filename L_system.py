@@ -1,9 +1,13 @@
 '''
 formal deduction system   by  mbinary  @2018-3-6
 use > to repr -> ,  ~ for 取反
+read from left to right
+eg p>~(q>~r)
 
-i feel pretty sorry for that there still are some bugs: it can't prove some prop.
+i feel pretty sorry for that there  are possibly  some bugs.
 I am striving to handle them.
+If your find some or you have some good idea abuot the method of proving,
+please tell me, many thanks!
 '''
 
 import re
@@ -155,7 +159,7 @@ class formula:
             this func converts it to preorder form(probably  contains parentheses)
         '''
         def addParentheses(li):
-            return [LEFT]+li +[RIGHT] if len(li)>=3 and li[0]!=LEFT else li
+            return [LEFT]+li +[RIGHT] if len(li)>=3  else li
         
         self.pt = begin
         
@@ -179,8 +183,8 @@ class formula:
                 if not isConn(tmp):ct+=1
                 elif tmp==CONTAIN:ct-=1
             # notice that the left formula needn't add parentheses
-            return self.pre2in(li,last)+[CONTAIN]+ \
-                   addParentheses(self.pre2in(li,self.pt))  
+            return addParentheses(self.pre2in(li,last)) \
+                   +[CONTAIN]+ addParentheses(self.pre2in(li,self.pt))
         else:
             self.pt+=1
             return [li[self.pt-1]]
@@ -202,14 +206,6 @@ class  L_system:
         right = contain(p,q)
         return contain(left,right)
     
-    def threeSeg(self,f1,f2):
-        '''{p->q,q->r } |- p->r}  or modus ponens : {p, p->q} |-  q'''
-        p,q= f1.p2q()
-        s,t = f2.p2q()
-        if p==s and q==None:return t
-        elif q==s: return contain(p,t)
-        return  None
-    
     def genFormula(self,s:str)->formula:
         s=s.replace('~~','')
         s=s.replace('->','>')
@@ -218,38 +214,55 @@ class  L_system:
         s = in2pre(li)
         return formula(s)
 
-    def addTheo(self,li,mp):
-        tmp_mp = {}
-        for i in li:
-            p,q = i.p2q()
-            if q is None:
-                p,q = non(i).p2q()
-            if q is None:continue
+    def addL1(self,i,p,q,tmp_mp):
+        '''i = p>q加入否定前件律.以及L1得来的公式'''
+        if not p.isNonType():
+            #  p>q or p>~q: get  ~p>(p>q)
+            tmp_mp[contain(non(p),i)] = ([],'否定前件律')
+        if not q.isNonType():
+            # p>q  :  get theorem  q>(p>q)
+            tmp_mp[contain(q,i)] = ([],'L1')
+
+    def addMP(self,i,p,q,tmp_mp):
+        '''i=p>Q加入 换位律公式,以及mp得来的公式'''
+        if p.isNonType() and q.isNonType():
+            # p=~a,q=~b:   ~a->~b ->(b->a)
+            nonpq = contain(non(q),non(p))
+            comb = contain(i,nonpq)
+            tmp_mp[comb] = ([],'L3')
+            tmp_mp[nonpq] = ([i,comb],'MP')
+        elif not p.isNonType() and not q.isNonType():
+            # p->q ->(~q->~p)
+            pq = contain(non(q),non(p))
+            comb = contain(i,pq)
+            tmp_mp[comb] = ([],'换位律')
             
-            if not p.isNonType():
-                #  p>q or p>~q: get  ~p>(p>q)
-                tmp_mp[contain(non(p),i)] = ([],'否定前件律')
-            if not q.isNonType():
-                # p>q  :  get theorem  q>(p>q)
-                tmp_mp[contain(q,i)] = ([],'L1')
-                
-            if p.isNonType() and q.isNonType():
-                # p=~a,q=~b:   ~a->~b ->(b->a)
-                nonpq = contain(non(q),non(p))
-                comb = contain(i,nonpq)
-                tmp_mp[comb] = ([],'L3')
-                tmp_mp[nonpq] = ([i,comb],'MP')
-                
-            elif not p.isNonType() and not q.isNonType():
-                # p->q ->(~q->~p)
-                pq = contain(non(q),non(p))
-                comb = contain(i,pq)
-                tmp_mp[comb] = ([],'换位律')
-                tmp_mp[pq] = ([i,comb],'MP')
+            tmp_mp[pq] = ([i,comb],'MP')
+    def addTheo(self,li,mp):
+        def _iterLst(li,f):
+            tmp_mp = {}
+            for i in li:
+                p,q = i.p2q()
+                if q is None:
+                    i = non(i)
+                    p,q = i.p2q()
+                if q is None:continue
+                f(i,p,q,tmp_mp)
+            return tmp_mp
+            
+        tmp_mp = _iterLst(li,self.addMP)
+        tmp_mp.update( _iterLst(li,self.addMP))
         for i in tmp_mp:
             if i not in mp:mp[i]= tmp_mp[i]
-                            
-    def deduce(self,formulas,x,mp=None):
+
+        lst = [ i.pre  for p in mp for i in p.getPairs() if i not in mp]
+        tmp_mp= _iterLst(lst,self.addL1)
+        for i in tmp_mp:
+            if i not in mp:mp[i]= tmp_mp[i]
+                
+        #for i in mp:print(i,mp[i])
+        #print('*'*50)
+    def mpDeduce(self,formulas,x,mp=None):
 
         def getIdx(x):
             '''insert x in deduction and get idx of it, var ct, mp is in the outer func'''
@@ -263,7 +276,7 @@ class  L_system:
             appeared[x] = ct
             return ct
         
-        def mpDeduce(x):
+        def _mpDeduce(x):
             if x in proved:
                 return mp[x] if x in mp else None
             proved[x]=True
@@ -282,7 +295,7 @@ class  L_system:
             for pairs in li:
                 for pre,suf in pairs:
                     if suf in mp:continue
-                    tmp = mpDeduce(pre)
+                    tmp = _mpDeduce(pre)
                     if tmp is not None:
                         mp[pre]=tmp
                         mp[suf] = ([pre,contain(pre,suf)],'MP')
@@ -292,13 +305,15 @@ class  L_system:
 
         if mp is None:mp={i:([],'假定') for i in formulas}
         proved = {}
-        tmp  =  mpDeduce(x)
-        if tmp is None:return None
-        else:
-            mp[x] = tmp
-            ct,deduction, appeared = 0,[], {}
-            tmp=getIdx(x)
-            return deduction
+        tmp  =  _mpDeduce(x)
+        if tmp is None:
+            #tmp = dynamicMP(x)
+            #if tmp is None:return None
+            return None
+        mp[x] = tmp
+        ct,deduction, appeared = 0,[], {}
+        tmp=getIdx(x)
+        return deduction
 
 
     def nonDeduce(self,formulas,x,mp=None):
@@ -309,6 +324,7 @@ class  L_system:
         self.addTheo([non(x)],mp)
         nonSet = []
         for i in mp:
+            if i.isNonType():nonSet.append(i)
             pairs = i.getPairs()
             if pairs and  pairs[-1].suf.isNonType():
                 nonSet.append(pairs[-1].suf)
@@ -316,8 +332,8 @@ class  L_system:
         meth ='归谬法'  if x.isNonType() else '反证法'
         
         for i in nonSet:
-            p1 = self.deduce(formulas,i,mp)
-            p2 = self.deduce(formulas,non(i),mp)
+            p1 = self.mpDeduce(formulas,i,mp)
+            p2 = self.mpDeduce(formulas,non(i),mp)
             if p1 is None or p2 is None:continue
             else:
                 s = '由{meth},即证(1) {{{formulas}}} |- {p}\n            (2) {{{formulas}}} |- {nonp}'\
@@ -325,7 +341,7 @@ class  L_system:
                 return s, p1, p2
         return None,None,None
                     
-    def getProve(self,formulas,x):
+    def prove(self,formulas,x):
         print('*'*65)
         x = self.genFormula(x)
         formulas =[self.genFormula(i) for i in formulas]
@@ -343,12 +359,12 @@ class  L_system:
         self.addTheo(mp.keys(),mp)  # get some theorem
 
         # MP  modus ponous
-        p = L.deduce(formulas,x,mp)
+        p = L.mpDeduce(formulas,x,mp)
         if p is None:
             #反证,归谬
             s,prv1,prv2 = self.nonDeduce(formulas,x,mp)
             if s is None:
-                print("Sorry! I can't deduce ")
+                print("Sorry! I can't prove this proposition. Maybe it's unprovale ")
             else:
                 print(s)
                 print('证明(1)')
@@ -384,11 +400,15 @@ if __name__=='__main__':
             ('(~(x1>x3)>x1)',[]),
            ('p->r',['p->q','~(q->r)->~p']),
            ('p>(~q>~(p>q))',[]),
-           ('p>q>p>p',[])
+           ('p>q>p>p',[]),
+           ('~p>p>p',[]),
+           ('~(p>q)>~q',[]),
+           ('~(p>q)>~q',[]),
            ]
+    #props =[('p>q>p>p',[])]
     for prop,garma in props:
         try:
-            L.getProve(garma,prop)
+            L.prove(garma,prop)
         except IndexError as e:
             print(garma,prop)
             print('Error! invalid propositions')
