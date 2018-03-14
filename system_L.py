@@ -189,7 +189,7 @@ class formula:
             self.pt+=1
             return [li[self.pt-1]]
 
-class  L_system:
+class  system_L:
     def __init__(self):
         pass
     def l1(self,p,q):
@@ -395,7 +395,7 @@ def random_prop(prop = formula([sympy.Symbol('p')]),\
 
 
 if __name__=='__main__':
-    L = L_system()
+    L = system_L()
     props=[('((x1>(x2>x3))>(x1> x2)) ->((x1>(x2>x3))->(x1>x3))',[]),
             ('(~(x1>x3)>x1)',[]),
            ('p->r',['p->q','~(q->r)->~p']),
