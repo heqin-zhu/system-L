@@ -1,9 +1,15 @@
-# formal deduction system   by  mbinary  @2018-3-6
-# use > to repr -> ,  ~ for 取反
+'''
+formal deduction system   by  mbinary  @2018-3-6
+use > to repr -> ,  ~ for 取反
+
+i feel pretty sorry for that there still are some bugs: it can't prove some prop.
+I am striving to handle them.
+'''
 
 import re
 import sympy
 from random import  randint
+from collections import namedtuple
 
 
 NON = sympy.Symbol('~')
@@ -15,6 +21,7 @@ RIGHT = sympy.Symbol(')')
 CONN=[NON,CONTAIN,LEFT,RIGHT]
 
 
+PAIR = namedtuple('pair',['pre','suf'])
 
 def non(p):
     li = p.getPreOrderLst()
@@ -42,8 +49,13 @@ def in2pre(s):
             if s[i]==LEFT:ct-=1
             elif s[i]==RIGHT:ct+=1
             i+=delta
-            if ct == 0 :break
+            if ct == 0:break
+        try:
+            while s[i]==NON:
+                i+=delta
+        except:pass
         return i
+
     n = len(s)
     if n<=2 :return s
     i = matchParentheses()
@@ -62,9 +74,9 @@ class formula:
         self.preOrderLst = preOrderLst
         if not self.isValid(): raise Exception('invalid formula')
         self.inOrderLst = self.pre2in(self.preOrderLst)
-        
+        self.sz = len(self.preOrderLst)
     def __bool__(self): return bool(self.preOrderLst)
-    def __len__(self):return len(self.preOrderLst)
+    def __len__(self):return self.sz
     def __getitem(self,i):return self.preOrderLst[i]
     def __iter__(self):return iter(self.preOrderLst)
     def __repr__(self): return 'formula({})'.format(str(self))
@@ -100,17 +112,16 @@ class formula:
             ct+=w(s[i])
             i+=1
         return (ct==1 and i==n,i)
-    def sequence(self):
-        '''return sequence of formulas after enough p2p func,
+    def getPairs(self):
+        '''return getPairs of formulas after enough p2p func,
             eg p>(q>~r)>(~t>s): return [p>(q>~r),~t>s,~t,s]
         '''
-        li =[self]
+        s = []  #pair(self,None)
         cur = self
         while 1:
             p,q = cur.p2q()
-            if q is None:return li
-            li.append(p)
-            li.append(q)
+            if q is None:return s
+            s.append(PAIR(p,q))
             cur = q
             
     def p2q(self,fm=None):
@@ -199,17 +210,6 @@ class  L_system:
         elif q==s: return contain(p,t)
         return  None
     
-    def syllogism2(self,p,q,formulas = None):
-        '''yanyi  deduce:formula set A  A |-  p->q  <->>  A+{p} |- q'''
-        if formulas is None :formulas = self.formulas
-        formulas.append(p)
-        return formulas ,q
-    def syllogism(self,p,q,formulas=None):
-        '''yanyi  deduce:formula set A  A+{p} |- q  <->>  A |-  p->q '''
-        if formulas is None :formulas = self.formulas
-        formulas.remove(p)
-        return formulas, contain(p,q)
-    
     def genFormula(self,s:str)->formula:
         s=s.replace('~~','')
         s=s.replace('->','>')
@@ -218,30 +218,36 @@ class  L_system:
         s = in2pre(li)
         return formula(s)
 
-    def theorem(self,mp,li=None):
-        if li==None:li= mp.keys()
-        tmp_mp={}
+    def addTheo(self,li,mp):
+        tmp_mp = {}
         for i in li:
             p,q = i.p2q()
-            if q is not None:
-                if p.isNonType() and q.isNonType():
-                    # p=~a,q=~b:   ~a->~b ->(b->a)
-                    nonpq = contain(non(q),non(p))
-                    comb = contain(i,nonpq)
-                    tmp_mp[comb] = ([],'L3')
-                    tmp_mp[nonpq] = ([i,comb],'MP')
-                elif not p.isNonType() and not q.isNonType():
-                    # p->q ->(~q->~p)
-                    pq = contain(non(q),non(p))
-                    comb = contain(i,pq)
-                    tmp_mp[comb] = ([],'换位律')
-                    tmp_mp[pq] = ([i,comb],'MP')
-            else:
+            if q is None:
                 p,q = non(i).p2q()
-                if q is not None:
-                    tmp_mp[contain(non(p),non(i))] = ([],'否定前件律')
-
-        mp.update(tmp_mp)
+            if q is None:continue
+            
+            if not p.isNonType():
+                #  p>q or p>~q: get  ~p>(p>q)
+                tmp_mp[contain(non(p),i)] = ([],'否定前件律')
+            if not q.isNonType():
+                # p>q  :  get theorem  q>(p>q)
+                tmp_mp[contain(q,i)] = ([],'L1')
+                
+            if p.isNonType() and q.isNonType():
+                # p=~a,q=~b:   ~a->~b ->(b->a)
+                nonpq = contain(non(q),non(p))
+                comb = contain(i,nonpq)
+                tmp_mp[comb] = ([],'L3')
+                tmp_mp[nonpq] = ([i,comb],'MP')
+                
+            elif not p.isNonType() and not q.isNonType():
+                # p->q ->(~q->~p)
+                pq = contain(non(q),non(p))
+                comb = contain(i,pq)
+                tmp_mp[comb] = ([],'换位律')
+                tmp_mp[pq] = ([i,comb],'MP')
+        for i in tmp_mp:
+            if i not in mp:mp[i]= tmp_mp[i]
                             
     def deduce(self,formulas,x,mp=None):
 
@@ -258,21 +264,34 @@ class  L_system:
             return ct
         
         def mpDeduce(x):
-            if x in mp:return ([],'假定')
-            li = [sq[i] for i in sq if x in sq[i]]
-            for s in li:
-                i,n =1,len(s)
-                while n>i and s[i]!=x:
-                    pre = s[i] 
+            if x in proved:
+                return mp[x] if x in mp else None
+            proved[x]=True
+            if x in mp:return mp[x]
+            
+            li = []
+            # x在fomrulas 中的 可能的证明: p1,p2,p3...,x  的列表
+            
+            for p in mp :
+                pairs =p.getPairs()
+                for idx, pair in enumerate(pairs):
+                    if pair.suf == x:
+                        li.append(pairs[:idx+1])
+                        break
+            
+            for pairs in li:
+                for pre,suf in pairs:
+                    if suf in mp:continue
                     tmp = mpDeduce(pre)
                     if tmp is not None:
                         mp[pre]=tmp
-                        mp[s[i+1]] = ([pre,s[i-1]],'MP')
-                    i+=2
-            return mp[x] if x in mp else None
+                        mp[suf] = ([pre,contain(pre,suf)],'MP')
+                    else:break
+                else:return mp[x]
+            return  None
 
         if mp is None:mp={i:([],'假定') for i in formulas}
-        sq = {i:i.sequence() for i in mp}
+        proved = {}
         tmp  =  mpDeduce(x)
         if tmp is None:return None
         else:
@@ -286,17 +305,23 @@ class  L_system:
         '''反证法,归谬法'''
         if mp is None: mp={i:([],'假定') for i in formulas}
         mp[non(x)] = ([],'假定')
-        self.theorem(mp,[non(x)])
-        sq = {i:i.sequence() for i in mp}
-        nonSet = [ i for i in sq if sq[i][-1].isNonType()]
+        formulas.append(non(x))
+        self.addTheo([non(x)],mp)
+        nonSet = []
+        for i in mp:
+            pairs = i.getPairs()
+            if pairs and  pairs[-1].suf.isNonType():
+                nonSet.append(pairs[-1].suf)
+                
         meth ='归谬法'  if x.isNonType() else '反证法'
+        
         for i in nonSet:
             p1 = self.deduce(formulas,i,mp)
             p2 = self.deduce(formulas,non(i),mp)
             if p1 is None or p2 is None:continue
             else:
                 s = '由{meth},即证(1) {{{formulas}}} |- {p}\n            (2) {{{formulas}}} |- {nonp}'\
-                    .format(meth=meth,formulas=','.join([str(i) for i in formulas]+[str(non(x))]),p=i,nonp=non(i))
+                    .format(meth=meth,formulas=','.join([str(i) for i in formulas]),p=i,nonp=non(i))
                 return s, p1, p2
         return None,None,None
                     
@@ -308,14 +333,14 @@ class  L_system:
 
         #演绎定理　　syllogism
         origin = x
-        li = x.sequence()
-        if len(li)>1:
-            formulas += li[1::2]
-            x = li[-1]
+        pairs = x.getPairs()
+        if pairs:
+            formulas += [i[0] for i in pairs]
+            x = pairs[-1].suf
             print('由演绎定理,即证  {{{}}} |- {} '.format(', '.join([str(i) for i in formulas]),x))
 
         mp={i:([],'假定') for i in formulas}
-        self.theorem(mp)  # get some theorem
+        self.addTheo(mp.keys(),mp)  # get some theorem
 
         # MP  modus ponous
         p = L.deduce(formulas,x,mp)
@@ -355,9 +380,17 @@ def random_prop(prop = formula([sympy.Symbol('p')]),\
 
 if __name__=='__main__':
     L = L_system()
-    props=['((x1>(x2>x3))>(x1> x2)) ->((x1>(x2>x3))->(x1>x3))',
-            '(~(x1>x3)>x1)',
-           'p->r']
-    st=[[],[],['p->q','~(q->r)->~p']]
-    for s,prop in zip(st,props):
-        L.getProve(s,prop)
+    props=[('((x1>(x2>x3))>(x1> x2)) ->((x1>(x2>x3))->(x1>x3))',[]),
+            ('(~(x1>x3)>x1)',[]),
+           ('p->r',['p->q','~(q->r)->~p']),
+           ('p>(~q>~(p>q))',[]),
+           ('p>q>p>p',[])
+           ]
+    for prop,garma in props:
+        try:
+            L.getProve(garma,prop)
+        except IndexError as e:
+            print(garma,prop)
+            print('Error! invalid propositions')
+        except Exception as e:
+            print(e)
