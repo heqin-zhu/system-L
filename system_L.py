@@ -102,7 +102,7 @@ class formula:
             return:  (bool,int)
         '''
         
-        weight={NON:0,CONTAIN:-1} # symbol:1
+        weight={NON:0,CONTAIN:-1}  # proposition varible :1
         if s is None:s = self.preOrderLst 
         
         def w(sym):
@@ -118,7 +118,7 @@ class formula:
         '''return Pairs of formulas likr[(p,q)...] after applying enough p2p func,
             eg q>(~r>(~t>s)): return [(q,~r>(~t>s)),(~r,~t>s),(~t,s)]
         '''
-        s = []  #pair(self,None)
+        s = []  
         cur = self
         while 1:
             p,q = cur.p2q()
@@ -180,7 +180,6 @@ class formula:
                 self.pt+=1
                 if not isConn(tmp):ct+=1
                 elif tmp==CONTAIN:ct-=1
-            # notice that the left formula needn't add parentheses
             return addParentheses(self.pre2in(li,last)) \
                    +[CONTAIN]+ addParentheses(self.pre2in(li,self.pt))
         else:
@@ -257,9 +256,7 @@ class  system_L:
         tmp_mp= _iterLst(lst,self.addL1)
         for i in tmp_mp:
             if i not in mp:mp[i]= tmp_mp[i]
-                
-        #for i in mp:print(i,mp[i])
-        #print('*'*50)
+
     def mpDeduce(self,formulas,x,mp=None):
 
         def getIdx(x):
@@ -281,7 +278,7 @@ class  system_L:
             if x in mp:return mp[x]
             
             li = []
-            # x在fomrulas 中的 可能的证明: p1,p2,p3...,x  的列表
+            # x在fomrulas 中的 可能的证明: [p1,p2,p3...,x]  的列表
             
             for p in mp :
                 pairs =p.getPairs()
@@ -305,8 +302,6 @@ class  system_L:
         proved = {}
         tmp  =  _mpDeduce(x)
         if tmp is None:
-            #tmp = dynamicMP(x)
-            #if tmp is None:return None
             return None
         mp[x] = tmp
         ct,deduction, appeared = 0,[], {}
@@ -358,6 +353,7 @@ class  system_L:
 
         # MP  modus ponous
         p = L.mpDeduce(formulas,x,mp)
+        
         if p is None:
             #反证,归谬
             s,prv1,prv2 = self.nonDeduce(formulas,x,mp)
