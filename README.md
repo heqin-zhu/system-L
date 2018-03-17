@@ -17,7 +17,8 @@ click [here]() to see more details
 
 
 ## Requirement
-* syspy
+python modules
+* sympy
 
 ## Usage
 
