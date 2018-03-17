@@ -12,8 +12,8 @@ The basic three axioms:
 
 ### deduction
 {p,p->q} |- q
-
-click [here]() to see more details 
+you can read the professional [book](src/mathematical-logic.pdf)
+or click [here](https://en.wikipedia.org/wiki/Mathematical_logic) to see more details 
 
 
 ## Requirement
@@ -21,7 +21,8 @@ python modules
 * sympy
 
 ## Usage
-
+## Visual
+![](src/sys-L.png)
 ## Contact
 * mail: zhuheqin1@gmail.com
 * QQ  : 414313516
