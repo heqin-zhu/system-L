@@ -28,7 +28,7 @@ python modules
 * QQ  : 414313516
 
 ## Licence
-[MIT](mit-licence.txt)
+[MIT](LICENCE-MIT.txt)
 
 ---
 
