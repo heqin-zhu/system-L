@@ -1,13 +1,24 @@
 '''
-formal deduction system   by  mbinary  @2018-3-6
+Name: formal deduction system   
+Author: mbinary  
+Time: 2018-3-6
+Description:
+
 use > to repr -> ,  ~ for 取反
 read from left to right
 eg p>~(q>~r)
+
 
 i feel pretty sorry for that there  are possibly  some bugs.
 I am striving to handle them.
 If your find some or you have some good ideas about the method of proving,
 please tell me, many thanks!
+
+
+To do:
+* 将证明过程对象化,便于处理,打印(英文版,中文版),
+* 其他连接词的转换
+* 处理简单的, 有一定模式的自然语言, 形成命题推理
 '''
 
 import re
@@ -18,7 +29,9 @@ from collections import namedtuple
 
 NON = sympy.Symbol('~')
 CONTAIN = sympy.Symbol('>')
-#AND = sympy .Symbol('
+AND = sympy .Symbol('&')
+OR = sysmpy.Symbol('|')
+EQUAL = sysmpy.Symbol('-')
 LEFT = sympy.Symbol('(')
 RIGHT = sympy.Symbol(')')
 
@@ -205,6 +218,8 @@ class  system_L:
     
     def genFormula(self,s:str)->formula:
         s=s.replace('~~','')  #  simplify the deduction,  to do
+		s=s.replace('<->','-')
+		# to do
         s=s.replace('->','>')
         li = re.findall(r'[\(\)\>\~]|\w+',s)
         li = [sympy.Symbol(i) for i in li]

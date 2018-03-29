@@ -27,9 +27,15 @@ To prove one proposition:
 python modules
 * sympy
 
-## Usage
 ## Visual
+
 ![](src/sys-L.png)
+
+## To do
+* 将证明过程对象化,便于处理,打印(英文版,中文版),
+* 其他连接词的转换
+* 处理简单的, 有一定模式的自然语言, 形成命题推理
+
 ## Contact
 * mail: zhuheqin1@gmail.com
 * QQ  : 414313516
