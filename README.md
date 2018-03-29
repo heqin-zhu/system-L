@@ -12,9 +12,16 @@ The basic three axioms:
 
 ### deduction
 {p,p->q} |- q
+
 you can read the professional [book](src/mathematical-logic.pdf)
 or click [here](https://en.wikipedia.org/wiki/Mathematical_logic) to see more details 
 
+## Idea
+To prove one proposition:
+* Firstly, I use deduction theorem(演绎定理) to de-level the formula and finally get a prop varible or a prop in form of `~(...)`. let's  mark it as p or ~p
+* Next, I create a set `garma` and fill it with  some generated  formulas using the three axioms(公理),some theorem and conclusions.
+* Then, I search p or ~p in `garma, or further, using modus ponent(MP) to deduct  p or ~p.
+* Finally, if using mp can't prove it, I will use `Proof by contradiction`(反证法) to prove it.
 
 ## Requirement
 python modules
