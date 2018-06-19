@@ -41,10 +41,4 @@ python modules
 * QQ  : 414313516
 
 ## Licence
-[MIT](LICENCE-MIT.txt)
-
----
-
-## Change Log
-time | description
-  :-:|:-:
+[MIT](LICENCE)
