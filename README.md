@@ -1,10 +1,10 @@
 # system-L
 [![Stars](https://img.shields.io/github/stars/mbinary/system-L.svg?label=Stars&style=social)](https://github.com/mbinary/system-L/stargazers)
 [![Forks](https://img.shields.io/github/forks/mbinary/system-L.svg?label=Fork&style=social)](https://github.com/mbinary/system-L/network/members)
-[![repo-size](https://img.shields.io/github/repo-size/mbinary/system-L.svg)]()
+[![Repo size](https://img.shields.io/github/repo-size/mbinary/system-L.svg)]()
 [![License](https://img.shields.io/badge/LICENSE-MIT-blue.svg)](LICENSE)
 [![Language](https://img.shields.io/badge/language-python3.6-orange.svg)]()
-[![Build](https://travis-ci.org/mbinary/system-L.svg?branch=master)]()
+[![Build](https://github.com/mbinary/system-L/workflows/build/badge.svg)]()
 
 ## Descripton
 it's a formal logic deduction based on system-L
