@@ -4,7 +4,7 @@
 [![Repo size](https://img.shields.io/github/repo-size/mbinary/system-L.svg)]()
 [![License](https://img.shields.io/badge/LICENSE-MIT-blue.svg)](LICENSE)
 [![Language](https://img.shields.io/badge/language-python3.6-orange.svg)]()
-[![Build](https://github.com/mbinary/system-L/workflows/build/badge.svg)]()
+[![coverage](https://github.com/mbinary/system-L/workflows/coverage/badge.svg)]()
 
 ## Descripton
 It's a formal logic deduction based on system-L
