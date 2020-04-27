@@ -12,7 +12,8 @@ jobs:
     - uses: actions/setup-python@v1
       with:
           python-version: '3.6'
-    - run:
+    - name: install python modules and generate report
+      run: |
           pip install sympy
           pip install coverage
           coverage xml system_L.py
