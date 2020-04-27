@@ -22,5 +22,5 @@ jobs:
     - name: upload coverage to codecov
       uses: codecov/codecov-action@v1
       with:
-          # token: ${{secrets.CODECOV_TOKEN}}  # required for private repos
+          token: ${{secrets.CODECOV_TOKEN}}
           file: ./coverage.xml
