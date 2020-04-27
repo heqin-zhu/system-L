@@ -14,6 +14,7 @@ e.g. p>~(q>~r)
 
 import re
 import sympy
+from random import randint
 from collections import namedtuple
 
 
@@ -384,7 +385,7 @@ class system_L:
             if p1 is None or p2 is None:
                 continue
             else:
-                s = '由{meth},即证(1) {{{formulas}}} |- {p}\n            (2) {{{formulas}}} |- {nonp}'\
+                s = '由{meth},即证: \n(1) {{{formulas}}} |- {p}\n(2) {{{formulas}}} |- {nonp}'\
                     .format(meth=meth, formulas=','.join([str(i) for i in formulas]), p=i, nonp=non(i))
                 return s, p1, p2
         return None, None, None
@@ -425,9 +426,26 @@ class system_L:
         else:
             self.display(p)
         print('*'*65)
-        print('\n\n')
+        print('\n')
 
     def display(self, props):
         for i, (f, wds) in enumerate(props):
             print('[{}]: {}{explan}'.format(
                 i+1, str(f).ljust(50, '-'), explan=wds))
+
+
+def random_prop(prop=formula([sympy.Symbol('p')]),
+                symbols=sympy.symbols('p q r s t'), n=15):
+    def addLevel(p, sig):
+        if sig == 0:
+            return non(p)
+        else:
+            cur = fs[randint(0, len(fs)-1)]
+            if randint(0, 1) == 0:
+                return contain(cur, p)
+            else:
+                return contain(p, cur)
+    fs = [formula([i]) for i in symbols]
+    for i in range(n):
+        prop = addLevel(prop, randint(0, 1))
+    return prop

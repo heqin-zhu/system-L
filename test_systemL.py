@@ -1,24 +1,5 @@
 import sympy
-from system_L import system_L, formula
-from random import randint
-
-
-def random_prop(prop=formula([sympy.Symbol('p')]),
-                symbols=sympy.symbols('p q r s t'), n=10):
-    fs = [formula([i]) for i in symbols]
-
-    def addLevel(p, sig):
-        if sig == 0:
-            return non(p)
-        else:
-            cur = fs[randint(0, len(fs)-1)]
-            if randint(0, 1) == 0:
-                return contain(cur, p)
-            else:
-                return contain(p, cur)
-    for i in range(10):
-        prop = addLevel(prop, randint(0, 1))
-    return prop
+from system_L import *
 
 
 def test_systemL():
@@ -31,9 +12,15 @@ def test_systemL():
              ('~p>p>p', []),
              ('~(p>q)>~q', []),
              ('~(p>q)>~q', []),
+             (str(random_prop(n=5)), []),
+             (str(random_prop(n=10)), []),
+             ('invalid', []),
              ]
     for prop, garma in props:
-        L.prove(garma, prop)
+        try:
+            L.prove(garma, prop)
+        except Exception as e:
+            print(e)
 
 
 if __name__ == "__main__":
