@@ -13,7 +13,7 @@ It's a formal logic deduction based on system-L
 ### symbols
 - `~`: negation
 - `->`: deduce (denoted as '>')
-### rules
+### Axioms
 The three basic axioms:
 * L1: `p->(q->p)`
 * L2: `(p->(q->r)) -> ((p->q)->(p->r))`
@@ -22,14 +22,13 @@ The three basic axioms:
 ### deduction
 `{p,p->q} |- q`
 
-you can read the professional [book](src/mathematical-logic.pdf)
-or click [here](https://en.wikipedia.org/wiki/Mathematical_logic) to see more details 
+Read this [book](src/mathematical-logic.pdf) or click [here](https://en.wikipedia.org/wiki/Mathematical_logic) to see more details.
 
 ## Methods
 To prove one proposition:
-* Firstly, I use deduction theorem to de-level the formula and finally get a prop varible or a prop in form of `~(...)`. let's  mark it as p or ~p
-* Next, I create a set `garma` and fill it with  some generated  formulas using the three axioms,some theorem and conclusions.
-* Then, I search p or ~p in `garma, or further, using modus ponent(MP) to deduct  p or ~p.
+* Firstly, Use deduction theorem to de-level the formula and get a proposition variable or a proposition in form of `~(...)`. Let's denote it as `p` or `~p`.
+* Next, Create a set called `garma` and fill it with some generated formulas which is deduced from the above axioms, some theorems and conclusions.
+* Then, Search `p` or `~p` in `garma`, or further, using modus ponent(MP) to deduce  `p` or `~p`.
 * Finally, if MP can't prove it, use `Proof by contradiction` instead.
 
 ## Requirements
