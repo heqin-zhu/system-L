@@ -4,7 +4,9 @@
 [![Repo size](https://img.shields.io/github/repo-size/mbinary/system-L.svg)]()
 [![License](https://img.shields.io/badge/LICENSE-MIT-blue.svg)](LICENSE)
 [![Language](https://img.shields.io/badge/language-python3.6-orange.svg)]()
-[![coverage](https://github.com/mbinary/system-L/workflows/coverage/badge.svg)]()
+[![build](https://github.com/mbinary/system-L/workflows/coverage/badge.svg)]()
+[![Coverage](https://codecov.io/gh/mbinary/system-L/branch/master/graph/badge.svg)](https://codecov.io/github/mbinary/system-L?branch=master)
+
 
 ## Descripton
 It's a formal logic deduction based on system-L
