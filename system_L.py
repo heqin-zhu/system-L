@@ -24,10 +24,7 @@ OR = sympy.Symbol('|')
 EQUAL = sympy.Symbol('-')
 LEFT = sympy.Symbol('(')
 RIGHT = sympy.Symbol(')')
-
 CONN = [NON, CONTAIN, LEFT, RIGHT]
-
-
 PAIR = namedtuple('pair', ['pre', 'suf'])
 
 
@@ -412,7 +409,7 @@ class system_L:
         self.addTheo(mp.keys(), mp)  # get some theorem
 
         # MP  modus ponous
-        p = L.mpDeduce(formulas, x, mp)
+        p = self.mpDeduce(formulas, x, mp)
 
         if p is None:
             # 反证,归谬
@@ -434,42 +431,3 @@ class system_L:
         for i, (f, wds) in enumerate(props):
             print('[{}]: {}{explan}'.format(
                 i+1, str(f).ljust(50, '-'), explan=wds))
-
-
-def random_prop(prop=formula([sympy.Symbol('p')]),
-                symbols=sympy.symbols('p q r s t'), n=10):
-    fs = [formula([i]) for i in symbols]
-
-    def addLevel(p, sig):
-        if sig == 0:
-            return non(p)
-        else:
-            cur = fs[randint(0, len(fs)-1)]
-            if randint(0, 1) == 0:
-                return contain(cur, p)
-            else:
-                return contain(p, cur)
-    for i in range(10):
-        prop = addLevel(prop, randint(0, 1))
-    return prop
-
-
-if __name__ == "__main__":
-    L = system_L()
-    props = [('((x1>(x2>x3))>(x1> x2)) ->((x1>(x2>x3))->(x1>x3))', []),
-             ('(~(x1>x3)>x1)', []),
-             ('p->r', ['p->q', '~(q->r)->~p']),
-             ('p>(~q>~(p>q))', []),
-             ('p>q>p>p', []),
-             ('~p>p>p', []),
-             ('~(p>q)>~q', []),
-             ('~(p>q)>~q', []),
-             ]
-    for prop, garma in props:
-        try:
-            L.prove(garma, prop)
-        except IndexError as e:
-            print(garma, prop)
-            print('Error! invalid propositions')
-        except Exception as e:
-            print(e)

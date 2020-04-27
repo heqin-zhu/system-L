@@ -3,14 +3,14 @@
 [![Forks](https://img.shields.io/github/forks/mbinary/system-L.svg?label=Fork&style=social)](https://github.com/mbinary/system-L/network/members)
 [![Repo size](https://img.shields.io/github/repo-size/mbinary/system-L.svg)]()
 [![License](https://img.shields.io/badge/LICENSE-MIT-blue.svg)](LICENSE)
-[![Language](https://img.shields.io/badge/language-python3.6-orange.svg)]()
+[![Language](https://img.shields.io/badge/language-python3.5+-orange.svg)]()
 [![build](https://github.com/mbinary/system-L/workflows/build/badge.svg)]()
 [![Coverage](https://codecov.io/gh/mbinary/system-L/branch/master/graph/badge.svg)](https://codecov.io/github/mbinary/system-L?branch=master)
 
 
 ## Descripton
 It's a formal logic deduction based on system-L
-### symbols
+### Symbols
 - `~`: negation
 - `->`: deduce (denoted as '>')
 ### Axioms
@@ -19,7 +19,7 @@ The three basic axioms:
 * L2: `(p->(q->r)) -> ((p->q)->(p->r))`
 * L3: `~q->~p -> (p->q)`
 
-### deduction
+### Deduction
 `{p,p->q} |- q`
 
 Read this [book](src/mathematical-logic.pdf) or click [here](https://en.wikipedia.org/wiki/Mathematical_logic) to see more details.
